@@ -1,0 +1,23 @@
+# Consensus Recommendations on Training and Competing in the Heat
+
+## Metadata
+- **Authors**: Sébastien Racinais, Juan-Manuel Alonso, Aaron J. Coutts, Andreas D. Flouris, Olivier Girard, José González-Alonso, Christoph Hausswirth, Ollie Jay, Jason K.W. Lee, Neil Mitchell, George P. Nassis, Lars Nybo, Babette M. Pluim, Bart Roelands, Michael N. Sawka, Jonathan Wingo, Julien D. Périard
+- **Year**: 2015
+- **Journal**: British Journal of Sports Medicine
+- **DOI**: 10.1136/bjsports-2015-094915
+
+## Abstract
+
+Athletic competitions frequently take place in hot environmental conditions that pose significant challenges to performance and health. This consensus statement synthesizes current evidence on physiological responses to exercising in the heat and provides practical recommendations for training and competing in hot environments. Exercise in heat stress elicits a cascade of thermoregulatory, cardiovascular, and metabolic responses that collectively impair endurance performance by three to twenty percent depending on exercise duration, intensity, and environmental conditions. Core temperature elevation, increased cardiovascular strain from competing demands for blood flow between working muscles and the skin for heat dissipation, altered substrate utilization, and central nervous system fatigue all contribute to performance decrements. Heat acclimation through repeated exercise-heat exposures over seven to fourteen days induces beneficial adaptations including expanded plasma volume, earlier onset and increased rate of sweating, reduced core temperature at rest and during exercise, reduced heart rate during submaximal exercise, improved thermal comfort, and enhanced cellular heat shock protein responses. Short-term heat acclimation protocols of five to seven days capture approximately seventy-five percent of the total acclimation response, while longer protocols of ten to fourteen days are required for complete cardiovascular and sudomotor adaptation. Permissive dehydration during heat acclimation sessions may enhance the plasma volume expansion response but should be carefully managed to prevent excessive fluid deficits. Pre-cooling strategies including cold water immersion, ice slurry ingestion, and cooling garments can temporarily reduce pre-exercise core temperature and extend the thermal margin for heat storage during subsequent exercise. During-exercise cooling through cold fluid ingestion and external cooling provides additional but smaller performance benefits in prolonged events. Hydration strategies should aim to limit body mass losses to less than two to three percent during exercise in the heat, with individualized fluid intake plans based on sweat rate assessment. The consensus panel recommends that athletes competing in hot conditions undertake a structured heat acclimation program beginning at least two weeks before competition, implement pre-cooling and during-exercise cooling strategies, and develop individualized hydration plans.
+
+## Key Findings
+
+- Heat acclimation over seven to fourteen days of repeated exercise-heat exposure induces plasma volume expansion, reduced core temperature, enhanced sweating, and improved cardiovascular stability
+- Short-term protocols of five to seven days achieve approximately seventy-five percent of complete heat acclimation adaptations
+- Pre-cooling strategies reduce pre-exercise core temperature by zero point three to zero point five degrees Celsius and can improve endurance performance by three to five percent in hot conditions
+- Exercise performance in the heat is impaired by three to twenty percent depending on duration and environmental severity
+- Hydration strategies should limit body mass losses to two to three percent during exercise with individualized fluid plans based on measured sweat rates
+
+## Practical Implications
+
+Athletes preparing for competition in hot environments should begin a structured heat acclimation protocol at least two weeks in advance, consisting of daily exercise sessions of sixty to ninety minutes in hot conditions with progressive increases in intensity. Athletes unable to travel to hot climates can use indoor heat chambers, additional clothing, or hot water immersion post-exercise to simulate heat stress. Pre-competition cooling using cold water immersion, ice vests, or ice slurry ingestion should be incorporated into warm-up routines when competing in the heat. Fluid intake during competition should be planned based on individual sweat rate testing conducted during training in similar environmental conditions. Coaches should adjust training intensity expectations during the initial days of heat exposure and progressively increase demands as acclimation adaptations develop.
