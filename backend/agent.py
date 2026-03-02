@@ -20,6 +20,7 @@ CLI:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -255,6 +256,9 @@ def _execute_tool(name: str, input_args: dict[str, Any]) -> str:
 # SSE helpers
 # ---------------------------------------------------------------------------
 
+_KEEPALIVE_COMMENT = ": keepalive\n\n"
+_KEEPALIVE_INTERVAL = 15.0  # seconds
+
 
 def _sse(event: str, data: Any) -> str:
     """Format a single Server-Sent Event."""
@@ -262,6 +266,45 @@ def _sse(event: str, data: Any) -> str:
     data_lines = payload.splitlines() or [""]
     body = "\n".join(f"data: {line}" for line in data_lines)
     return f"event: {event}\n{body}\n\n"
+
+
+async def with_keepalive(
+    source: AsyncGenerator[str, None],
+    interval: float = _KEEPALIVE_INTERVAL,
+) -> AsyncGenerator[str, None]:
+    """Wrap an SSE async generator, injecting comment pings every *interval* seconds.
+
+    Render's load balancer (and most proxies) close idle SSE connections after
+    ~60 seconds of silence.  This wrapper drains *source* in a background task
+    and re-yields its chunks immediately, but also emits an SSE comment line
+    (``": keepalive\\n\\n"``) whenever no chunk arrives within *interval* seconds.
+    SSE comment lines are ignored by ``EventSource`` clients but keep the TCP
+    connection alive through any intermediate proxy.
+    """
+    queue: asyncio.Queue[str | None] = asyncio.Queue()
+
+    async def _drain() -> None:
+        try:
+            async for chunk in source:
+                await queue.put(chunk)
+        finally:
+            await queue.put(None)  # sentinel
+
+    task = asyncio.create_task(_drain())
+    try:
+        while True:
+            try:
+                chunk = await asyncio.wait_for(queue.get(), timeout=interval)
+            except asyncio.TimeoutError:
+                yield _KEEPALIVE_COMMENT
+                continue
+            if chunk is None:
+                break
+            yield chunk
+    finally:
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError, Exception):
+            await task
 
 
 # ---------------------------------------------------------------------------

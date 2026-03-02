@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from agent import run_agent_stream
+from agent import run_agent_stream, with_keepalive
 from app.models.schemas import ChatRequest
 
 router = APIRouter()
@@ -28,7 +28,7 @@ async def chat(body: ChatRequest) -> StreamingResponse:
         })
 
     return StreamingResponse(
-        run_agent_stream(body.message, messages=messages),
+        with_keepalive(run_agent_stream(body.message, messages=messages)),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

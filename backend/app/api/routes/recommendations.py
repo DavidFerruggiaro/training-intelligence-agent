@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from agent import run_agent_stream
+from agent import run_agent_stream, with_keepalive
 from app.models.schemas import RecommendRequest
 
 router = APIRouter()
@@ -35,7 +35,7 @@ async def generate_recommendation(body: RecommendRequest) -> StreamingResponse:
     prompt = " ".join(parts)
 
     return StreamingResponse(
-        run_agent_stream(prompt),
+        with_keepalive(run_agent_stream(prompt)),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
