@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -11,7 +12,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   Area,
   AreaChart,
 } from "recharts";
@@ -21,45 +21,54 @@ import {
 // ---------------------------------------------------------------------------
 
 const COLORS = {
-  hrv: "var(--color-chart-hrv)",
-  hrvAvg: "var(--color-chart-hrv-avg)",
-  deep: "var(--color-chart-deep)",
-  rem: "var(--color-chart-rem)",
-  light: "var(--color-chart-light)",
-  strain: "var(--color-chart-strain)",
   recovery: "var(--color-chart-recovery)",
-  grid: "transparent",
-  text: "var(--color-secondary)",
+  recoveryDim: "var(--color-accent-dim)",
+  strain: "var(--color-chart-strain)",
+  heart: "var(--color-chart-heart)",
+  deep: "var(--color-chart-sleep-deep)",
+  rem: "var(--color-chart-sleep-rem)",
+  light: "var(--color-chart-sleep-light)",
+  baseline: "var(--color-chart-baseline)",
 };
 
-const AXIS_STYLE = { fontSize: 11, fill: COLORS.text, fontWeight: 500 };
+const AXIS_STYLE = {
+  fontSize: 11,
+  fill: "var(--color-muted)",
+  fontFamily: "var(--font-sans)",
+};
 
-function MetricSummary({ label, value, unit, trend }) {
+// ---------------------------------------------------------------------------
+// Chart card wrapper
+// ---------------------------------------------------------------------------
+
+function ChartCard({ title, children, metric, glowClass = "" }) {
   return (
-    <div className="mb-6 flex items-baseline gap-2">
-      <span className="text-4xl font-light tracking-tight text-primary">
-        {value !== undefined ? value : "—"}
-      </span>
-      <span className="text-sm font-medium text-secondary">{unit}</span>
-      {trend && (
-        <span className={`text-xs font-medium ml-2 flex items-center ${trend > 0 ? 'text-success' : 'text-danger'}`}>
-          {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
-        </span>
-      )}
+    <div className={`rounded-[var(--radius-lg)] border border-border bg-card p-5 hover:border-border-light transition-colors duration-200 ${glowClass} animate-fade-in`}>
+      <div className="flex items-start justify-between mb-1">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
+          {title}
+        </h3>
+      </div>
+      {metric && <ChartMetric {...metric} />}
+      <div className="mt-4">{children}</div>
     </div>
   );
 }
 
-function ChartCard({ title, children, metric }) {
+function ChartMetric({ value, unit, trend }) {
+  const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow">
-      <h3 className="text-[11px] font-semibold uppercase tracking-widest text-secondary mb-2">
-        {title}
-      </h3>
-      {metric && (
-        <MetricSummary {...metric} />
+    <div className="flex items-baseline gap-2 mt-2">
+      <span className="text-[1.75rem] font-bold leading-none tracking-tight text-primary tabular-nums">
+        {value !== undefined && value !== null ? value : "—"}
+      </span>
+      {unit && <span className="text-sm font-medium text-secondary">{unit}</span>}
+      {trend != null && trend !== 0 && (
+        <span className={`text-xs font-medium ml-1 flex items-center gap-0.5 ${trend > 0 ? "text-accent" : "text-danger"}`}>
+          <TrendIcon className="w-3 h-3" />
+          {Math.abs(trend)}%
+        </span>
       )}
-      {children}
     </div>
   );
 }
@@ -71,11 +80,11 @@ function ChartCard({ title, children, metric }) {
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-xs text-secondary mb-1">{label}</p>
+    <div className="bg-panel border border-border-light rounded-[var(--radius-md)] px-3 py-2.5 shadow-xl">
+      <p className="text-[10px] uppercase tracking-widest text-muted mb-1.5">{label}</p>
       {payload.map((entry) => (
-        <p key={entry.dataKey} className="text-xs" style={{ color: entry.color }}>
-          {entry.name}: <span className="font-medium text-primary">{entry.value != null ? entry.value : "—"}</span>
+        <p key={entry.dataKey} className="text-xs leading-relaxed" style={{ color: entry.color }}>
+          {entry.name}: <span className="font-semibold text-primary tabular-nums">{entry.value != null ? entry.value : "—"}</span>
         </p>
       ))}
     </div>
@@ -83,7 +92,7 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 // ---------------------------------------------------------------------------
-// 1. HRV Trend — line chart
+// 1. HRV Trend — area chart with glow
 // ---------------------------------------------------------------------------
 
 function HrvChart({ data }) {
@@ -92,39 +101,48 @@ function HrvChart({ data }) {
   const hrvTrend = latestHrv && prevHrv ? Math.round(((latestHrv - prevHrv) / prevHrv) * 100) : undefined;
 
   return (
-    <ChartCard 
-      title="HRV Trend" 
+    <ChartCard
+      title="HRV Trend"
       metric={{ value: latestHrv, unit: "ms", trend: hrvTrend }}
+      glowClass="glow-recovery"
     >
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
           <defs>
             <linearGradient id="colorHrv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.hrv} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={COLORS.hrv} stopOpacity={0}/>
+              <stop offset="5%" stopColor={COLORS.recovery} stopOpacity={0.15} />
+              <stop offset="95%" stopColor={COLORS.recovery} stopOpacity={0} />
             </linearGradient>
+            <filter id="glowHrv">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+          <CartesianGrid stroke={COLORS.baseline} strokeOpacity={0.3} vertical={false} />
           <XAxis dataKey="date" tick={AXIS_STYLE} tickFormatter={(v) => v.slice(5)} axisLine={false} tickLine={false} dy={10} />
           <YAxis tick={AXIS_STYLE} domain={["auto", "auto"]} axisLine={false} tickLine={false} dx={-10} />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }} />
           <Area
             type="monotone"
             dataKey="hrv"
             name="HRV"
-            stroke={COLORS.hrv}
-            strokeWidth={3}
+            stroke={COLORS.recovery}
+            strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorHrv)"
-            activeDot={{ r: 6, strokeWidth: 0 }}
+            activeDot={{ r: 5, strokeWidth: 0, fill: COLORS.recovery }}
+            filter="url(#glowHrv)"
             connectNulls
           />
           <Line
             type="monotone"
             dataKey="hrv_7d"
             name="7-day avg"
-            stroke={COLORS.hrvAvg}
-            strokeWidth={2}
+            stroke={COLORS.recoveryDim}
+            strokeWidth={1.5}
             strokeDasharray="5 5"
             dot={false}
             connectNulls
@@ -140,7 +158,6 @@ function HrvChart({ data }) {
 // ---------------------------------------------------------------------------
 
 function SleepChart({ data }) {
-  // Compute light sleep = total - deep - REM
   const sleepData = useMemo(
     () =>
       data.map((d) => ({
@@ -163,16 +180,16 @@ function SleepChart({ data }) {
   const sleepTrend = latestSleep && prevSleep ? Math.round(((latestSleep - prevSleep) / prevSleep) * 100) : undefined;
 
   return (
-    <ChartCard 
-      title="Sleep Architecture" 
+    <ChartCard
+      title="Sleep Architecture"
       metric={{ value: latestSleep, unit: "hrs", trend: sleepTrend }}
     >
       <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={sleepData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+        <BarChart data={sleepData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }} barGap={2}>
+          <CartesianGrid stroke={COLORS.baseline} strokeOpacity={0.3} vertical={false} />
           <XAxis dataKey="date" tick={AXIS_STYLE} tickFormatter={(v) => v.slice(5)} axisLine={false} tickLine={false} dy={10} />
           <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false} dx={-10} />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
           <Bar dataKey="deep" name="Deep" stackId="sleep" fill={COLORS.deep} radius={[0, 0, 0, 0]} />
           <Bar dataKey="rem" name="REM" stackId="sleep" fill={COLORS.rem} />
           <Bar dataKey="light" name="Light" stackId="sleep" fill={COLORS.light} radius={[4, 4, 0, 0]} />
@@ -195,7 +212,6 @@ function StrainRecoveryChart({ data }) {
           strain: d.day_strain,
           recovery: d.recovery_score,
           date: d.date,
-          // Size dots by strain intensity
           z: d.day_strain * 10,
         })),
     [data],
@@ -206,13 +222,14 @@ function StrainRecoveryChart({ data }) {
   const recoveryTrend = latestRecovery && prevRecovery ? Math.round(((latestRecovery - prevRecovery) / prevRecovery) * 100) : undefined;
 
   return (
-    <ChartCard 
+    <ChartCard
       title="Strain vs Recovery"
       metric={{ value: latestRecovery, unit: "%", trend: recoveryTrend }}
+      glowClass="glow-strain"
     >
       <ResponsiveContainer width="100%" height={200}>
         <ScatterChart margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+          <CartesianGrid stroke={COLORS.baseline} strokeOpacity={0.3} vertical={false} />
           <XAxis
             dataKey="strain"
             name="Strain"
@@ -234,21 +251,21 @@ function StrainRecoveryChart({ data }) {
             dx={-10}
           />
           <Tooltip
-            cursor={{ strokeDasharray: '3 3', stroke: 'rgba(255,255,255,0.2)' }}
+            cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.15)" }}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const d = payload[0].payload;
               return (
-                <div className="bg-surface-raised border border-border rounded-xl px-4 py-3 shadow-2xl">
-                  <p className="text-[11px] uppercase tracking-widest text-secondary mb-2">{d.date}</p>
+                <div className="bg-panel border border-border-light rounded-[var(--radius-md)] px-3.5 py-2.5 shadow-xl">
+                  <p className="text-[10px] uppercase tracking-widest text-muted mb-1.5">{d.date}</p>
                   <div className="space-y-1">
-                    <p className="text-sm flex justify-between gap-4">
+                    <p className="text-xs flex justify-between gap-4">
                       <span className="text-secondary">Strain</span>
-                      <span className="font-medium text-warning">{d.strain}</span>
+                      <span className="font-semibold text-warning tabular-nums">{d.strain}</span>
                     </p>
-                    <p className="text-sm flex justify-between gap-4">
+                    <p className="text-xs flex justify-between gap-4">
                       <span className="text-secondary">Recovery</span>
-                      <span className="font-medium text-success">{d.recovery}%</span>
+                      <span className="font-semibold text-accent tabular-nums">{d.recovery}%</span>
                     </p>
                   </div>
                 </div>
@@ -258,7 +275,7 @@ function StrainRecoveryChart({ data }) {
           <Scatter
             data={scatterData}
             fill={COLORS.recovery}
-            fillOpacity={0.8}
+            fillOpacity={0.7}
           />
         </ScatterChart>
       </ResponsiveContainer>
@@ -273,11 +290,9 @@ function StrainRecoveryChart({ data }) {
 export default function BiometricCharts({ data, loading, error }) {
   if (loading) {
     return (
-      <section className="rounded-xl border border-border bg-card p-8">
-        <div className="flex items-center justify-center gap-2 text-sm text-secondary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin text-accent">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-          </svg>
+      <section className="rounded-[var(--radius-lg)] border border-border bg-card p-8">
+        <div className="flex items-center justify-center gap-2.5 text-sm text-secondary">
+          <Loader2 className="w-4 h-4 animate-spin text-accent" />
           Loading biometric data…
         </div>
       </section>
@@ -286,7 +301,7 @@ export default function BiometricCharts({ data, loading, error }) {
 
   if (error) {
     return (
-      <section className="rounded-xl border border-border bg-card p-8">
+      <section className="rounded-[var(--radius-lg)] border border-border bg-card p-8">
         <p className="text-sm text-danger text-center">{error}</p>
       </section>
     );
@@ -294,18 +309,18 @@ export default function BiometricCharts({ data, loading, error }) {
 
   if (!data.length) {
     return (
-      <section className="rounded-xl border border-border bg-card p-8">
-        <p className="text-sm text-secondary text-center">No biometric data available.</p>
+      <section className="rounded-[var(--radius-lg)] border border-border bg-card p-8">
+        <p className="text-sm text-muted text-center">No biometric data available.</p>
       </section>
     );
   }
 
   return (
-    <section className="mt-8">
-      <h2 className="text-xs font-medium uppercase tracking-widest text-secondary mb-4 px-1">
+    <section>
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted mb-4">
         Biometric Trends — Last {data.length} Days
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 stagger">
         <HrvChart data={data} />
         <SleepChart data={data} />
         <StrainRecoveryChart data={data} />
