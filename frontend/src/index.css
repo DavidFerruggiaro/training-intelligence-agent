@@ -1,40 +1,65 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/*  Theme — WHOOP/Apple Health inspired dark palette                  */
+/*  Theme — Athlete's Command Center                                  */
+/*  Strava meets WHOOP: data-forward, premium, alive                  */
 /* ------------------------------------------------------------------ */
 
 @theme {
-  --color-surface: #000000;
-  --color-surface-raised: #0f0f0f;
-  --color-card: #111111;
-  --color-card-hover: #161616;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-light: rgba(255, 255, 255, 0.1);
+  /* Surfaces — deep zinc-charcoal, not pure black */
+  --color-surface: #09090B;
+  --color-surface-raised: #111114;
+  --color-card: #16161A;
+  --color-card-hover: #1C1C22;
+  --color-panel: #1E1E24;
 
+  /* Accent — WHOOP green */
   --color-accent: #00F19F;
-  --color-accent-dim: #00A36C;
-  --color-accent-glow: rgba(0, 241, 159, 0.15);
+  --color-accent-dim: #00B377;
+  --color-accent-glow: rgba(0, 241, 159, 0.12);
+  --color-accent-subtle: rgba(0, 241, 159, 0.06);
 
-  --color-primary: #ffffff;
-  --color-secondary: #a1a1aa;
-  --color-muted: #71717a;
+  /* Secondary accent — data blue */
+  --color-blue: #3B82F6;
+  --color-blue-dim: #2563EB;
+  --color-blue-glow: rgba(59, 130, 246, 0.12);
 
+  /* Semantic */
   --color-success: #00F19F;
-  --color-warning: #FF9F0A;
-  --color-danger: #FF453A;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
 
-  /* Chart palette */
-  --color-chart-hrv: #00F19F;
-  --color-chart-hrv-avg: #00A36C;
-  --color-chart-deep: #5E5CE6;
-  --color-chart-rem: #BF5AF2;
-  --color-chart-light: #64D2FF;
-  --color-chart-strain: #FF9F0A;
+  /* Text */
+  --color-primary: #FAFAFA;
+  --color-secondary: #A1A1AA;
+  --color-muted: #71717A;
+  --color-ghost: #3F3F46;
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-light: rgba(255, 255, 255, 0.10);
+  --color-border-accent: rgba(0, 241, 159, 0.20);
+
+  /* Chart palette — semantic color assignment */
   --color-chart-recovery: #00F19F;
+  --color-chart-strain: #F59E0B;
+  --color-chart-heart: #EF4444;
+  --color-chart-sleep-deep: #6366F1;
+  --color-chart-sleep-rem: #A855F7;
+  --color-chart-sleep-light: #38BDF8;
+  --color-chart-baseline: #3F3F46;
+  --color-chart-area-fill: rgba(0, 241, 159, 0.08);
 
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radius scale */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 }
 
 /* ------------------------------------------------------------------ */
@@ -84,7 +109,7 @@ body {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -99,8 +124,18 @@ body {
   100% { transform: scale(0.8); opacity: 0.5; }
 }
 
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .animate-fade-in {
-  animation: fade-in 0.4s ease-out forwards;
+  animation: fade-in 0.4s ease-out both;
 }
 
 .animate-slide-in-right {
@@ -115,6 +150,60 @@ body {
   animation: pulse-dot 1.5s ease-in-out infinite;
 }
 
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.animate-count-up {
+  animation: count-up 0.5s ease-out both;
+}
+
+/* Staggered children — add delay-N classes */
+.stagger > :nth-child(1) { animation-delay: 0ms; }
+.stagger > :nth-child(2) { animation-delay: 50ms; }
+.stagger > :nth-child(3) { animation-delay: 100ms; }
+.stagger > :nth-child(4) { animation-delay: 150ms; }
+.stagger > :nth-child(5) { animation-delay: 200ms; }
+.stagger > :nth-child(6) { animation-delay: 250ms; }
+
+/* ------------------------------------------------------------------ */
+/*  Glow effects — signature element                                  */
+/* ------------------------------------------------------------------ */
+
+.glow-recovery {
+  box-shadow: 0 0 20px rgba(0, 241, 159, 0.06),
+              inset 0 1px 0 rgba(0, 241, 159, 0.08);
+}
+
+.glow-strain {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.06),
+              inset 0 1px 0 rgba(245, 158, 11, 0.08);
+}
+
+.glow-danger {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.06),
+              inset 0 1px 0 rgba(239, 68, 68, 0.08);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Metric display                                                    */
+/* ------------------------------------------------------------------ */
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reduced motion                                                    */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Recharts overrides for dark theme                                 */
 /* ------------------------------------------------------------------ */
@@ -124,14 +213,14 @@ body {
 }
 
 .recharts-text {
-  fill: var(--color-secondary);
+  fill: var(--color-muted);
   font-size: 11px;
 }
 
 .recharts-tooltip-wrapper .recharts-default-tooltip {
-  background-color: var(--color-surface-raised) !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 12px !important;
+  background-color: var(--color-panel) !important;
+  border: 1px solid var(--color-border-light) !important;
+  border-radius: var(--radius-md) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
   padding: 12px !important;
 }
@@ -160,7 +249,7 @@ body {
 
 .prose h1, .prose h2, .prose h3, .prose h4 {
   color: var(--color-primary);
-  font-weight: 500;
+  font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
 }
