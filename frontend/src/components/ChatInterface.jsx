@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { streamSSE, toolLabel } from "../lib/api";
+import { Check, MessageSquare, Send } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Message bubble
@@ -11,25 +12,23 @@ function MessageBubble({ role, content, steps }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fade-in`}>
       <div
-        className={`max-w-[85%] rounded-2xl px-5 py-4 text-[15px] leading-relaxed ${
+        className={`max-w-[85%] rounded-[var(--radius-lg)] px-4 py-3.5 text-sm leading-relaxed ${
           isUser
-            ? "bg-accent/10 text-primary rounded-br-sm border border-accent/20"
-            : "bg-surface-raised border border-border text-primary rounded-bl-sm shadow-sm"
+            ? "bg-accent/[0.08] text-primary rounded-br-sm border border-accent/15 ml-12"
+            : "bg-card border border-border text-primary rounded-bl-sm mr-12"
         }`}
       >
         {/* Tool steps (assistant only) */}
         {steps?.length > 0 && (
           <div className="mb-3 pb-3 border-b border-border/50">
             {steps.map((step, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs text-secondary py-1">
+              <div key={i} className="flex items-center gap-2 text-xs text-secondary py-0.5">
                 {step.status === "done" ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent flex-shrink-0">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <Check className="w-3 h-3 text-accent flex-shrink-0" />
                 ) : (
-                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse-dot flex-shrink-0 mx-1" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot flex-shrink-0 mx-[3px]" />
                 )}
-                <span className="truncate tracking-wide">{step.label}</span>
+                <span className="truncate">{step.label}</span>
               </div>
             ))}
           </div>
@@ -71,22 +70,18 @@ export default function ChatInterface() {
     setInput("");
     setIsStreaming(true);
 
-    // Add user message
     const userMsg = { role: "user", content: text, steps: [] };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
 
-    // Build history for the API (only role + content)
     const history = updatedMessages.map((m) => ({
       role: m.role,
       content: m.content,
     }));
 
-    // We'll stream into a new assistant message
     let assistantText = "";
     let assistantSteps = [];
 
-    // Add placeholder assistant message
     setMessages((prev) => [...prev, { role: "assistant", content: "", steps: [] }]);
 
     const controller = new AbortController();
@@ -95,7 +90,7 @@ export default function ChatInterface() {
     try {
       for await (const { event, data } of streamSSE(
         "/api/chat",
-        { message: text, history: history.slice(0, -1) }, // history excludes current user msg
+        { message: text, history: history.slice(0, -1) },
         controller.signal,
       )) {
         switch (event) {
@@ -143,7 +138,7 @@ export default function ChatInterface() {
             break;
 
           case "error":
-            assistantText += `\n\n⚠ Error: ${data.error}`;
+            assistantText += `\n\nError: ${data.error}`;
             setMessages((prev) => {
               const next = [...prev];
               next[next.length - 1] = {
@@ -161,7 +156,7 @@ export default function ChatInterface() {
           const next = [...prev];
           next[next.length - 1] = {
             ...next[next.length - 1],
-            content: assistantText + `\n\n⚠ ${err.message}`,
+            content: assistantText + `\n\n${err.message}`,
           };
           return next;
         });
@@ -177,16 +172,14 @@ export default function ChatInterface() {
   return (
     <section className="flex flex-col h-full bg-surface">
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5 space-y-3">
         {messages.length === 0 && (
           <div className="h-full flex items-center justify-center">
             <div className="text-center space-y-3">
-              <div className="w-12 h-12 mx-auto rounded-full bg-accent/10 flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
+              <div className="w-10 h-10 mx-auto rounded-full bg-accent/[0.08] flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-accent" />
               </div>
-              <p className="text-sm text-secondary max-w-[220px] mx-auto">
+              <p className="text-sm text-muted max-w-[220px] mx-auto leading-relaxed">
                 Ask follow-up questions about your training, recovery, or biometrics.
               </p>
             </div>
@@ -200,9 +193,9 @@ export default function ChatInterface() {
         {/* Streaming indicator */}
         {isStreaming && messages[messages.length - 1]?.content === "" && messages[messages.length - 1]?.steps?.length === 0 && (
           <div className="flex justify-start animate-fade-in">
-            <div className="bg-surface-raised border border-border rounded-2xl rounded-bl-sm px-4 py-3">
-              <div className="flex items-center gap-2 text-sm text-secondary">
-                <div className="w-2 h-2 rounded-full bg-accent animate-pulse-dot" />
+            <div className="bg-card border border-border rounded-[var(--radius-lg)] rounded-bl-sm px-4 py-3 mr-12">
+              <div className="flex items-center gap-2.5 text-sm text-secondary">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
                 Thinking…
               </div>
             </div>
@@ -211,7 +204,7 @@ export default function ChatInterface() {
       </div>
 
       {/* Input */}
-      <div className="px-4 py-4 border-t border-border bg-surface flex-shrink-0">
+      <div className="px-4 py-3.5 border-t border-border bg-panel flex-shrink-0">
         <div className="flex gap-2 relative">
           <input
             type="text"
@@ -220,21 +213,21 @@ export default function ChatInterface() {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
             placeholder="Ask a follow-up question…"
             disabled={isStreaming}
-            className="flex-1 bg-surface-raised border border-border rounded-xl pl-4 pr-12 py-3 text-sm
-                       text-primary placeholder:text-muted focus:outline-none focus:border-accent/50
-                       transition-colors disabled:opacity-50"
+            className="flex-1 bg-surface border border-border rounded-[var(--radius-md)] pl-4 pr-12 py-3 text-sm
+                       text-primary placeholder:text-ghost focus:outline-none focus:border-accent/40
+                       focus:ring-1 focus:ring-accent/20 transition-colors duration-150
+                       disabled:opacity-50"
           />
           <button
             onClick={sendMessage}
             disabled={isStreaming || !input.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-accent text-surface rounded-lg
-                       hover:bg-accent/90 transition-colors disabled:opacity-40
-                       disabled:cursor-not-allowed cursor-pointer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
+                       bg-accent text-surface rounded-[var(--radius-sm)]
+                       hover:bg-accent-dim transition-colors duration-150
+                       disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer
+                       active:scale-[0.97]"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+            <Send className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
