@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { fetchBiometrics, streamSSE, toolLabel } from "../lib/api";
-import { MessageSquare, X, Activity } from "lucide-react";
+import { MessageSquare, X, Activity, Loader2 } from "lucide-react";
 import RecommendationCard from "./RecommendationCard";
-import BiometricCharts from "./BiometricCharts";
 import ChatInterface from "./ChatInterface";
 import CitationPanel from "./CitationPanel";
+import RecoveryCard from "./cards/RecoveryCard";
+import StrainCard from "./cards/StrainCard";
+import SleepCard from "./cards/SleepCard";
+import HrvCard from "./cards/HrvCard";
 
 // ---------------------------------------------------------------------------
 // Dashboard — main layout
@@ -45,57 +48,6 @@ export default function Dashboard() {
     })();
     return () => { cancelled = true; };
   }, []);
-
-  // ------------------------------------------------------------------
-  // Compute metric summaries from biometric data
-  // ------------------------------------------------------------------
-  const metrics = useMemo(() => {
-    if (!biometrics?.data?.length) return null;
-    const data = biometrics.data;
-    const latest = data.at(-1);
-    const prev = data.length > 1 ? data.at(-2) : null;
-
-    const pctChange = (curr, old) => {
-      if (!old || old === 0) return null;
-      return ((curr - old) / old * 100).toFixed(1);
-    };
-
-    const totalSleep = (d) => (d.deep_sleep_hours || 0) + (d.rem_sleep_hours || 0) + (d.light_sleep_hours || 0);
-    const latestSleep = totalSleep(latest);
-    const prevSleep = prev ? totalSleep(prev) : null;
-    const sleepH = Math.floor(latestSleep);
-    const sleepM = Math.round((latestSleep - sleepH) * 60);
-
-    return {
-      recovery: {
-        value: latest.recovery_score ?? latest.hrv_rmssd ?? "—",
-        unit: latest.recovery_score != null ? "%" : "ms",
-        label: latest.recovery_score != null ? "Recovery" : "HRV",
-        change: prev ? pctChange(
-          latest.recovery_score ?? latest.hrv_rmssd,
-          prev.recovery_score ?? prev.hrv_rmssd
-        ) : null,
-        color: "accent",
-      },
-      strain: {
-        value: latest.strain_score ?? latest.training_load ?? "—",
-        unit: "",
-        label: latest.strain_score != null ? "Strain" : "Training Load",
-        change: prev ? pctChange(
-          latest.strain_score ?? latest.training_load,
-          prev.strain_score ?? prev.training_load
-        ) : null,
-        color: "warning",
-      },
-      sleep: {
-        value: `${sleepH}h${sleepM.toString().padStart(2, "0")}m`,
-        unit: "",
-        label: "Sleep",
-        change: prevSleep ? pctChange(latestSleep, prevSleep) : null,
-        color: "blue",
-      },
-    };
-  }, [biometrics]);
 
   // ------------------------------------------------------------------
   // Format last-updated date
@@ -219,21 +171,28 @@ export default function Dashboard() {
 
       {/* ── Main content ── */}
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* ── Metric Summary Cards ── */}
-        {metrics && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger">
-            <MetricCard {...metrics.recovery} />
-            <MetricCard {...metrics.strain} />
-            <MetricCard {...metrics.sleep} />
+        {/* ── Biometric Cards ── */}
+        {bioLoading && (
+          <div className="rounded-[var(--radius-lg)] border border-border bg-card p-8">
+            <div className="flex items-center justify-center gap-2.5 text-sm text-secondary">
+              <Loader2 className="w-4 h-4 animate-spin text-accent" />
+              Loading biometric data…
+            </div>
           </div>
         )}
-
-        {/* ── Charts ── */}
-        <BiometricCharts
-          data={biometrics?.data || []}
-          loading={bioLoading}
-          error={bioError}
-        />
+        {bioError && (
+          <div className="rounded-[var(--radius-lg)] border border-border bg-card p-8">
+            <p className="text-sm text-danger text-center">{bioError}</p>
+          </div>
+        )}
+        {!bioLoading && !bioError && biometrics?.data?.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 stagger">
+            <RecoveryCard data={biometrics.data} />
+            <StrainCard data={biometrics.data} />
+            <SleepCard data={biometrics.data} />
+            <HrvCard data={biometrics.data} />
+          </div>
+        )}
 
         {/* ── AI Recommendations ── */}
         <RecommendationCard
@@ -276,52 +235,6 @@ export default function Dashboard() {
             </div>
           </div>
         </>
-      )}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// MetricCard — top-level KPI display
-// ---------------------------------------------------------------------------
-
-const colorMap = {
-  accent: {
-    text: "text-accent",
-    glow: "glow-recovery",
-    border: "border-accent/15",
-    bg: "bg-accent-subtle",
-  },
-  warning: {
-    text: "text-warning",
-    glow: "glow-strain",
-    border: "border-warning/15",
-    bg: "bg-warning/[0.04]",
-  },
-  blue: {
-    text: "text-blue",
-    glow: "",
-    border: "border-blue/15",
-    bg: "bg-blue/[0.04]",
-  },
-};
-
-function MetricCard({ value, unit, label, change, color }) {
-  const c = colorMap[color] || colorMap.accent;
-  const changeNum = change !== null ? parseFloat(change) : null;
-
-  return (
-    <div className={`rounded-[var(--radius-lg)] border ${c.border} ${c.bg} p-5 animate-fade-in ${c.glow}`}>
-      <p className="text-xs font-medium text-muted uppercase tracking-wider mb-3">{label}</p>
-      <p className={`text-[2rem] font-extrabold leading-none tracking-tight tabular-nums ${c.text}`}>
-        {value}
-        {unit && <span className="text-base font-semibold ml-1 text-secondary">{unit}</span>}
-      </p>
-      {changeNum !== null && (
-        <p className={`text-sm mt-2 font-medium tabular-nums ${changeNum >= 0 ? "text-accent" : "text-danger"}`}>
-          {changeNum >= 0 ? "+" : ""}{change}%
-          <span className="text-muted font-normal ml-1.5">vs yesterday</span>
-        </p>
       )}
     </div>
   );

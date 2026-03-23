@@ -41,12 +41,18 @@
   --color-border-light: rgba(255, 255, 255, 0.10);
   --color-border-accent: rgba(0, 241, 159, 0.20);
 
+  /* Card tint backgrounds */
+  --color-tint-recovery: rgba(0, 241, 159, 0.08);
+  --color-tint-strain: rgba(245, 158, 11, 0.08);
+  --color-tint-sleep: rgba(67, 56, 202, 0.08);
+  --color-tint-hrv: rgba(0, 179, 119, 0.08);
+
   /* Chart palette — semantic color assignment */
   --color-chart-recovery: #00F19F;
   --color-chart-strain: #F59E0B;
   --color-chart-heart: #EF4444;
-  --color-chart-sleep-deep: #6366F1;
-  --color-chart-sleep-rem: #A855F7;
+  --color-chart-sleep-deep: #4338CA;
+  --color-chart-sleep-rem: #EC4899;
   --color-chart-sleep-light: #38BDF8;
   --color-chart-baseline: #3F3F46;
   --color-chart-area-fill: rgba(0, 241, 159, 0.08);
@@ -183,6 +189,16 @@ body {
 .glow-danger {
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.06),
               inset 0 1px 0 rgba(239, 68, 68, 0.08);
+}
+
+.glow-sleep {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.06),
+              inset 0 1px 0 rgba(99, 102, 241, 0.08);
+}
+
+.glow-hrv {
+  box-shadow: 0 0 20px rgba(0, 179, 119, 0.06),
+              inset 0 1px 0 rgba(0, 179, 119, 0.08);
 }
 
 /* ------------------------------------------------------------------ */
