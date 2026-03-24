@@ -1,7 +1,6 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Check, ChevronDown, AlertCircle, RefreshCw, Sparkles } from "lucide-react";
+import { Check, ChevronDown, AlertCircle } from "lucide-react";
+import ResponseRenderer from "./ResponseRenderer";
 
 // ---------------------------------------------------------------------------
 // Step timeline item
@@ -37,7 +36,7 @@ function StepItem({ step, isLast }) {
 }
 
 // ---------------------------------------------------------------------------
-// RecommendationCard
+// RecommendationCard — output only (input lives in PromptHero)
 // ---------------------------------------------------------------------------
 
 export default function RecommendationCard({
@@ -46,69 +45,29 @@ export default function RecommendationCard({
   isStreaming,
   isDone,
   error,
-  onGenerate,
-  onCancel,
 }) {
-  const [goals, setGoals] = useState("");
   const [showChain, setShowChain] = useState(false);
-  const hasStarted = isStreaming || isDone || !!error || !!text || steps.length > 0;
 
   return (
     <section className="rounded-[var(--radius-lg)] border border-border bg-card overflow-hidden animate-fade-in">
       {/* Header */}
       <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-surface-raised/40">
-        <div className="flex items-center gap-2.5">
-          <Sparkles className="w-4 h-4 text-accent" />
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
-            AI Training Intelligence
-          </h2>
-        </div>
-
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
+          Training Recommendation
+        </h2>
         {isStreaming && (
-          <button
-            onClick={onCancel}
-            className="text-xs font-medium text-danger hover:text-danger/80 transition-colors duration-150 cursor-pointer"
-          >
-            Cancel
-          </button>
+          <div className="flex items-center gap-2 text-xs text-accent">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
+            Analyzing…
+          </div>
+        )}
+        {isDone && (
+          <span className="text-xs text-muted">Done</span>
         )}
       </div>
 
       {/* Body */}
       <div className="p-5 sm:p-6">
-        {/* ── Initial state — prompt input ── */}
-        {!hasStarted && (
-          <div className="max-w-2xl mx-auto py-6">
-            <p className="text-sm text-secondary leading-relaxed text-center mb-6">
-              Get a personalized training recommendation based on your
-              biometrics, training load, and sports science research.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                value={goals}
-                onChange={(e) => setGoals(e.target.value)}
-                placeholder="Training goals (optional)"
-                className="flex-1 bg-surface border border-border rounded-[var(--radius-md)] px-4 py-3 text-sm
-                           text-primary placeholder:text-ghost focus:outline-none focus:border-accent/40
-                           focus:ring-1 focus:ring-accent/20 transition-colors duration-150"
-                onKeyDown={(e) => e.key === "Enter" && onGenerate(goals)}
-              />
-              <button
-                onClick={() => onGenerate(goals)}
-                className="px-5 py-3 bg-accent text-surface font-semibold text-sm rounded-[var(--radius-md)]
-                           hover:bg-accent-dim transition-colors duration-150 flex-shrink-0
-                           cursor-pointer active:scale-[0.97]
-                           shadow-[0_0_20px_rgba(0,241,159,0.12)]
-                           hover:shadow-[0_0_30px_rgba(0,241,159,0.20)]"
-              >
-                Analyze &amp; Recommend
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* ── Error ── */}
         {error && (
           <div className="mb-5 p-4 rounded-[var(--radius-md)] bg-danger/[0.06] border border-danger/20">
@@ -120,7 +79,7 @@ export default function RecommendationCard({
         )}
 
         {/* ── Agent steps ── */}
-        {hasStarted && steps.length > 0 && (
+        {steps.length > 0 && (
           <div className="mb-5 bg-surface-raised/60 rounded-[var(--radius-md)] p-4 border border-border">
             <button
               onClick={() => setShowChain(!showChain)}
@@ -153,19 +112,7 @@ export default function RecommendationCard({
           </div>
         )}
 
-        {/* ── Recommendation text ── */}
-        {text && (
-          <div className="prose max-w-none text-[15px] leading-relaxed">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {text}
-            </ReactMarkdown>
-            {isStreaming && (
-              <span className="inline-block w-1.5 h-4 ml-1 bg-accent/70 animate-pulse-accent rounded-sm align-middle" />
-            )}
-          </div>
-        )}
-
-        {/* ── Streaming indicator ── */}
+        {/* ── Streaming indicator (before text arrives) ── */}
         {isStreaming && !text && !error && (
           <div className="flex items-center gap-3 text-sm text-secondary py-4">
             <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot" />
@@ -173,17 +120,9 @@ export default function RecommendationCard({
           </div>
         )}
 
-        {/* ── Regenerate ── */}
-        {isDone && !isStreaming && (
-          <div className="mt-6 pt-5 border-t border-border flex justify-end">
-            <button
-              onClick={() => onGenerate(goals)}
-              className="text-xs font-medium text-muted hover:text-accent transition-colors duration-150 cursor-pointer flex items-center gap-2 active:scale-[0.97]"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Regenerate
-            </button>
-          </div>
+        {/* ── Recommendation output ── */}
+        {text && (
+          <ResponseRenderer text={text} isStreaming={isStreaming} />
         )}
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { fetchBiometrics, streamSSE, toolLabel } from "../lib/api";
 import { MessageSquare, X, Activity, Loader2 } from "lucide-react";
+import PromptHero from "./PromptHero";
 import RecommendationCard from "./RecommendationCard";
 import ChatInterface from "./ChatInterface";
 import CitationPanel from "./CitationPanel";
@@ -171,6 +172,13 @@ export default function Dashboard() {
 
       {/* ── Main content ── */}
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* ── Prompt Hero ── */}
+        <PromptHero
+          onGenerate={getRecommendation}
+          isStreaming={recStreaming}
+          onCancel={cancelRecommendation}
+        />
+
         {/* ── Biometric Cards ── */}
         {bioLoading && (
           <div className="rounded-[var(--radius-lg)] border border-border bg-card p-8">
@@ -194,16 +202,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── AI Recommendations ── */}
-        <RecommendationCard
-          text={recText}
-          steps={recSteps}
-          isStreaming={recStreaming}
-          isDone={recDone}
-          error={recError}
-          onGenerate={getRecommendation}
-          onCancel={cancelRecommendation}
-        />
+        {/* ── AI Recommendation output (shown once generation starts) ── */}
+        {(recStreaming || recDone || !!recError || !!recText || recSteps.length > 0) && (
+          <RecommendationCard
+            text={recText}
+            steps={recSteps}
+            isStreaming={recStreaming}
+            isDone={recDone}
+            error={recError}
+          />
+        )}
 
         {/* ── Citations ── */}
         {recCitations.length > 0 && (

@@ -92,7 +92,7 @@ export default function RecoveryCard({ data }) {
           strokeWidth={8}
           color="var(--color-chart-recovery)"
         >
-          <span className="text-[2rem] font-extrabold leading-none tabular-nums text-primary">
+          <span className="text-[2rem] font-extrabold leading-none tabular-nums font-mono text-primary">
             {score != null ? Math.round(score) : "—"}
           </span>
           <span className="text-xs font-medium text-secondary mt-0.5">%</span>

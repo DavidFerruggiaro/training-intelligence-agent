@@ -90,7 +90,7 @@ export default function SleepCard({ data }) {
       <div className="flex items-start justify-between mb-4">
         {/* Left: duration + stage legend */}
         <div className="flex-1">
-          <p className="text-[2rem] font-extrabold leading-none tabular-nums text-primary mb-1">
+          <p className="text-[2rem] font-extrabold leading-none tabular-nums font-mono text-primary mb-1">
             {formatDuration(latest.asleep_duration_hrs)}
           </p>
           <p className="text-xs text-muted mb-4">Total Sleep</p>

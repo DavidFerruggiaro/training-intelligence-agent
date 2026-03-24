@@ -62,7 +62,7 @@ export default function HrvCard({ data }) {
 
       {/* Big number + trend */}
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[2.5rem] font-extrabold leading-none tabular-nums text-accent">
+        <span className="text-[2.5rem] font-extrabold leading-none tabular-nums font-mono text-accent">
           {latest.hrv != null ? Math.round(latest.hrv) : "—"}
         </span>
         <span className="text-sm font-medium text-secondary">ms</span>

@@ -87,7 +87,7 @@ export default function StrainCard({ data }) {
 
       {/* Big number + trend */}
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[2.5rem] font-extrabold leading-none tabular-nums text-warning">
+        <span className="text-[2.5rem] font-extrabold leading-none tabular-nums font-mono text-warning">
           {strain != null ? strain.toFixed(1) : "—"}
         </span>
         {trend != null && (
