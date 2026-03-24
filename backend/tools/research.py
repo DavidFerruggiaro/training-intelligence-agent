@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from knowledge.ingest import search_papers
-
 
 def search_research(
     query: str,
@@ -34,6 +32,7 @@ def search_research(
         return {"error": "Query string is required."}
 
     try:
+        from knowledge.ingest import search_papers  # lazy: defers ChromaDB + SentenceTransformer load
         raw_results = search_papers(query, n_results=n_results)
     except Exception as e:
         return {
